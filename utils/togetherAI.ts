@@ -22,6 +22,9 @@ export interface TogetherAIPayload {
  * @param {TogetherAIPayload} payload - The payload to send to Together AI API
  * @returns {ReadableStream} A transformed stream of the AI response
  */
+const TOGETHER_API_KEY =
+  "587dcb084e3b672ce9dfcc1459bdd62edeca846e271e02d189bfe421fccd471a";
+
 export async function TogetherAIStream(
   payload: TogetherAIPayload
 ): Promise<ReadableStream> {
@@ -33,7 +36,9 @@ export async function TogetherAIStream(
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.TOGETHER_API_KEY ?? ""}`,
+        Authorization: `Bearer ${
+          process.env.TOGETHER_API_KEY ?? TOGETHER_API_KEY
+        }`,
       },
       method: "POST",
       body: JSON.stringify(payload),
