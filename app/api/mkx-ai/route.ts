@@ -75,8 +75,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
   }
 
-  const SERPER_API_KEY =
-    process.env["SERPER_API_KEY"] ?? "badc815713965d4f632fd8e4d255a9a26bf930c1";
+  const SERPER_API_KEY = process.env["SERPER_API_KEY"];
   if (!SERPER_API_KEY) {
     throw new Error("SERPER_API_KEY is required");
   }
