@@ -174,7 +174,7 @@ export default function MkxAI() {
       <CssBaseline />
       {conversation.length === 0 ? (
         <div className="h-screen w-full flex flex-col gap-7 justify-center items-center transition-colors duration-300">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col dark:bg-gray-900 bg-gray-100 rounded-lg p-4 items-center">
             <p className="text-[1.875rem] font-bold bg-gradient-to-r from-[#9333ea] via-[#ec4899] to-[#3b82f6] bg-clip-text text-transparent animate-pulse">
               MKx AI
             </p>
