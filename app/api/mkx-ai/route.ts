@@ -11,6 +11,7 @@ import jsdom, { JSDOM } from "jsdom";
 import { NextResponse } from "next/server";
 import path from "path";
 import { z } from "zod";
+import os from "os";
 
 const defaultSafeSearch = "active";
 
@@ -34,7 +35,12 @@ const generateUniqueFileName = (): string => {
  * @param {any} data - Data to be written to the file
  */
 const writeJsonFile = (filePath: string, data: any): void => {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  } catch (error) {
+    // Handle read-only filesystem errors silently
+    // This allows the function to fail gracefully in serverless environments
+  }
 };
 
 /**
@@ -94,9 +100,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
   };
 
-  const storageDirectory = path.join(process.cwd(), "storage");
-  if (!fs.existsSync(storageDirectory)) {
-    fs.mkdirSync(storageDirectory);
+  // Use temp directory for serverless environments
+  const storageDirectory =
+    process.env.NODE_ENV === "production"
+      ? path.join(os.tmpdir(), "storage")
+      : path.join(process.cwd(), "storage");
+
+  try {
+    if (!fs.existsSync(storageDirectory)) {
+      fs.mkdirSync(storageDirectory, { recursive: true });
+    }
+  } catch (error) {
+    // If we can't create the directory, we'll continue without persistent storage
   }
 
   const sessionId = responseId ? responseId : generateUniqueFileName();
