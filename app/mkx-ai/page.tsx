@@ -172,60 +172,141 @@ export default function MkxAI() {
   return (
     <CssVarsProvider theme={theme} defaultMode="light">
       <CssBaseline />
-      <div className="h-screen w-full flex flex-col">
-        <div className="flex justify-center py-2">
-          <p className="text-[1.875rem] font-bold bg-gradient-to-r from-[#9333ea] via-[#ec4899] to-[#3b82f6] bg-clip-text text-transparent animate-pulse">
+      {conversation.length === 0 ? (
+        <div className="h-screen w-full flex flex-col gap-7 justify-center items-center transition-colors duration-300">
+          <div className="flex flex-col dark:bg-[#121212] bg-white rounded-lg p-4 items-center">
+            <p className="text-[1.875rem] font-bold bg-gradient-to-r from-[#9333ea] via-[#ec4899] to-[#3b82f6] bg-clip-text text-transparent animate-pulse">
+              MKx AI
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Ask me anything about the MKx AI
+            </p>
+          </div>
+
+          <form
+            onSubmit={handleSubmit}
+            className="w-11/12 lg:w-3/5 h-32 flex flex-col rounded-lg border-2 border-gray-200/60 dark:border-gray-500/20 shadow-md"
+          >
+            <textarea
+              value={query}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setQuery(e.target.value)
+              }
+              placeholder="Ask me anything..."
+              className="w-full h-full p-3 outline-none resize-none font-inherit text-inherit bg-transparent border-none"
+            />
+            <div className="flex justify-between items-center p-2">
+              <div className="flex gap-2 items-center">
+                <Select
+                  size="sm"
+                  value={level}
+                  onChange={(_, value) => setLevel(value ?? "high-school")}
+                  className="w-44"
+                >
+                  {levels?.map((level) => (
+                    <Option key={level.value} value={level.value}>
+                      {level.label}
+                    </Option>
+                  ))}
+                </Select>
+                <Select
+                  size="sm"
+                  className="w-32 !hidden lg:!flex"
+                  value={location}
+                  onChange={(_, value) => setLocation(value ?? "in")}
+                >
+                  {locations?.map((location) => (
+                    <Option key={location.value} value={location.value}>
+                      {location.label}
+                    </Option>
+                  ))}
+                </Select>
+                <Select
+                  size="sm"
+                  className="w-40 !hidden lg:!flex"
+                  value={language}
+                  onChange={(_, value) => setLanguage(value ?? "en-IN")}
+                >
+                  {languages?.map((language) => (
+                    <Option key={language.value} value={language.value}>
+                      {language.label}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+              <div className="flex gap-1">
+                <ModeToggle />
+                <IconButton variant="outlined" size="sm" type="submit">
+                  <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                    <g strokeWidth="0"></g>
+                    <g strokeLinecap="round" strokeLinejoin="round"></g>
+                    <g>
+                      <path
+                        d="M11.5003 12H5.41872M5.24634 12.7972L4.24158 15.7986C3.69128 17.4424 3.41613 18.2643 3.61359 18.7704C3.78506 19.21 4.15335 19.5432 4.6078 19.6701C5.13111 19.8161 5.92151 19.4604 7.50231 18.7491L17.6367 14.1886C19.1797 13.4942 19.9512 13.1471 20.1896 12.6648C20.3968 12.2458 20.3968 11.7541 20.1896 11.3351C19.9512 10.8529 19.1797 10.5057 17.6367 9.81135L7.48483 5.24303C5.90879 4.53382 5.12078 4.17921 4.59799 4.32468C4.14397 4.45101 3.77572 4.78336 3.60365 5.22209C3.40551 5.72728 3.67772 6.54741 4.22215 8.18767L5.24829 11.2793C5.34179 11.561 5.38855 11.7019 5.407 11.8459C5.42338 11.9738 5.42321 12.1032 5.40651 12.231C5.38768 12.375 5.34057 12.5157 5.24634 12.7972Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></path>
+                    </g>
+                  </svg>
+                </IconButton>
+              </div>
+            </div>
+          </form>
+        </div>
+      ) : (
+        <div className="h-screen w-full flex flex-col gap-7 py-2 justify-between items-center transition-colors duration-300">
+          <p className="text-[1.875rem] sticky top-0 font-bold bg-gradient-to-r from-[#9333ea] via-[#ec4899] to-[#3b82f6] bg-clip-text text-transparent animate-pulse">
             MKx AI
           </p>
-        </div>
-
-        <div className="flex-1 overflow-auto px-4">
-          {conversation.length === 0 ? (
-            <div className="h-full flex flex-col gap-7 justify-center items-center">
-              <div className="flex flex-col dark:bg-gray-900 bg-gray-100 rounded-lg p-4 items-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Ask me anything about the MKx AI
-                </p>
-              </div>
+          <div
+            ref={messagesEndRef}
+            className={classNames(
+              "h-full flex overflow-y-auto",
+              isLoading ? "justify-start" : "justify-center"
+            )}
+          >
+            <div className="flex flex-col w-full lg:w-3/5 gap-2">
+              {conversation.map((message, index) => (
+                <React.Fragment key={index}>
+                  {message.role === "assistant" ? (
+                    <div className="flex px-6 text-black dark:text-white flex-col">
+                      <TypewriterMarkdown>{message.content}</TypewriterMarkdown>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end p-2 gap-2">
+                      <p className="text-white bg-gray-800 rounded-lg p-3">
+                        {message.content}
+                      </p>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+              {isLoading && (
+                <div
+                  ref={loadersRef}
+                  className="flex flex-col gap-2 px-4 lg:w-[60vw] w-[90vw] h-full"
+                >
+                  <Skeleton variant="text" className="!w-full" />
+                  <Skeleton variant="text" className="!w-2/3" />
+                  <Skeleton variant="text" className="!w-full" />
+                  <Skeleton variant="text" className="!w-1/2" />
+                  <Skeleton variant="text" className="!w-3/4" />
+                  <Skeleton variant="text" className="!w-full" />
+                  <Skeleton variant="text" className="!w-2/3" />
+                  <Skeleton variant="text" className="!w-full" />
+                  <Skeleton variant="text" className="!w-1/2" />
+                  <Skeleton variant="text" className="!w-3/4" />
+                  <Skeleton variant="text" className="!w-full" />
+                  <Skeleton variant="text" className="!w-2/3" />
+                  <Skeleton variant="text" className="!w-full" />
+                  <Skeleton variant="text" className="!w-1/2" />
+                  <Skeleton variant="text" className="!w-3/4" />
+                </div>
+              )}
             </div>
-          ) : (
-            <div ref={messagesEndRef} className="flex justify-center">
-              <div className="flex flex-col w-full lg:w-3/5 gap-2">
-                {conversation.map((message, index) => (
-                  <React.Fragment key={index}>
-                    {message.role === "assistant" ? (
-                      <div className="flex px-6 text-black dark:text-white flex-col">
-                        <TypewriterMarkdown>
-                          {message.content}
-                        </TypewriterMarkdown>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end p-2 gap-2">
-                        <p className="text-white bg-gray-800 rounded-lg p-3">
-                          {message.content}
-                        </p>
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-                {isLoading && (
-                  <div
-                    ref={loadersRef}
-                    className="flex flex-col gap-2 px-4 lg:w-[60vw] w-[90vw]"
-                  >
-                    <Skeleton variant="text" className="!w-full" />
-                    <Skeleton variant="text" className="!w-2/3" />
-                    <Skeleton variant="text" className="!w-full" />
-                    <Skeleton variant="text" className="!w-1/2" />
-                    <Skeleton variant="text" className="!w-3/4" />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="p-2">
+          </div>
           <form
             onSubmit={handleSubmit}
             style={{
@@ -233,7 +314,7 @@ export default function MkxAI() {
                 colorScheme.mode === "dark" ? "#121212" : "white",
             }}
             className={classNames(
-              "mx-auto w-11/12 lg:w-3/5 flex rounded-lg items-center border-2 border-gray-200/60 dark:border-gray-500/20 shadow-md"
+              "w-11/12 lg:w-3/5 flex mb-2 rounded-lg items-center border-2 border-gray-200/60 dark:border-gray-500/20 shadow-md"
             )}
           >
             <textarea
@@ -242,56 +323,11 @@ export default function MkxAI() {
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setQuery(e.target.value)
               }
-              placeholder={
-                conversation.length === 0
-                  ? "Ask me anything..."
-                  : "Follow up question..."
-              }
+              placeholder="follow up question..."
               className="w-full p-2 outline-none resize-none font-inherit text-inherit bg-transparent border-none"
             />
 
-            <div className="flex items-center gap-2 p-2">
-              {conversation.length === 0 && (
-                <div className="flex gap-2 items-center">
-                  <Select
-                    size="sm"
-                    value={level}
-                    onChange={(_, value) => setLevel(value ?? "high-school")}
-                    className="w-44"
-                  >
-                    {levels?.map((level) => (
-                      <Option key={level.value} value={level.value}>
-                        {level.label}
-                      </Option>
-                    ))}
-                  </Select>
-                  <Select
-                    size="sm"
-                    className="w-32 !hidden lg:!flex"
-                    value={location}
-                    onChange={(_, value) => setLocation(value ?? "in")}
-                  >
-                    {locations?.map((location) => (
-                      <Option key={location.value} value={location.value}>
-                        {location.label}
-                      </Option>
-                    ))}
-                  </Select>
-                  <Select
-                    size="sm"
-                    className="w-40 !hidden lg:!flex"
-                    value={language}
-                    onChange={(_, value) => setLanguage(value ?? "en-IN")}
-                  >
-                    {languages?.map((language) => (
-                      <Option key={language.value} value={language.value}>
-                        {language.label}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              )}
-              <ModeToggle />
+            <div className="p-2">
               <IconButton variant="outlined" size="sm" type="submit">
                 <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
                   <g strokeWidth="0"></g>
@@ -310,7 +346,7 @@ export default function MkxAI() {
             </div>
           </form>
         </div>
-      </div>
+      )}
     </CssVarsProvider>
   );
 }
