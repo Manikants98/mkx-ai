@@ -257,9 +257,11 @@ export default function MkxAI() {
         </div>
       ) : (
         <div className="h-screen w-full flex flex-col gap-7 py-2 justify-between items-center transition-colors duration-300">
-          <p className="text-[1.875rem] dark:bg-[#121212] bg-white w-full sticky top-0 font-bold bg-gradient-to-r from-[#9333ea] via-[#ec4899] to-[#3b82f6] bg-clip-text text-transparent animate-pulse">
-            MKx AI
-          </p>
+          <div className="flex justify-center dark:bg-[#121212] bg-white w-full">
+            <p className="text-[1.875rem] sticky top-0 font-bold bg-gradient-to-r from-[#9333ea] via-[#ec4899] to-[#3b82f6] bg-clip-text text-transparent animate-pulse">
+              MKx AI
+            </p>
+          </div>
           <div
             ref={messagesEndRef}
             className={classNames(
